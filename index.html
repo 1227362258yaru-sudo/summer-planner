@@ -389,11 +389,11 @@
     font-size: 12px; color: var(--text-2);
     margin-top: 4px;
   }
-  /* 移动端：左右分栏，左列窄图标条 */
+  /* 移动端：左右分栏，左列 40% 宽显示完整模块名 */
   @media (max-width: 768px) {
     .app { padding: 0; }
     .layout {
-      grid-template-columns: 62px 1fr;
+      grid-template-columns: 40% 1fr;
       gap: 0;
       min-height: calc(100vh - 70px);
     }
@@ -403,13 +403,13 @@
       padding: 12px 14px;
     }
     .topbar .title { font-size: 16px; }
-    /* 左侧固定图标列：纵向滚动，总览在最上 */
+    /* 左侧模块列表：40% 宽，纵向滚动，总览在最上 */
     .sidebar {
       position: sticky;
       top: 70px;
       align-self: start;
       max-height: calc(100vh - 70px);
-      padding: 6px 0;
+      padding: 8px 6px;
       border-radius: 0;
       display: flex;
       flex-direction: column;
@@ -422,6 +422,7 @@
       background: var(--white);
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
+      border-right: 1px solid var(--border);
     }
     .sidebar::-webkit-scrollbar { display: none; }
     .sidebar h3, .module-section .section-title, .total-count { display: none; }
@@ -429,27 +430,31 @@
       display: contents;
       margin: 0; padding: 0; border: none;
     }
-    /* 图标项：默认只显示图标，激活/长按时显示名称 */
+    /* 模块项：图标+名称横向排列，大字号易点击 */
     .module-item {
       flex: 0 0 auto;
-      flex-direction: column;
-      gap: 2px;
-      padding: 8px 4px;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 10px;
       margin: 0;
       min-width: 0;
       width: 100%;
-      text-align: center;
-      border-radius: 0;
+      text-align: left;
+      border-radius: 10px;
       position: relative;
       cursor: pointer;
     }
-    .module-item .icon { font-size: 22px; }
+    .module-item .icon { font-size: 22px; flex-shrink: 0; }
     .module-item .name {
-      font-size: 9px;
-      line-height: 1.1;
-      margin-top: 2px;
-      word-break: break-all;
-      max-width: 56px;
+      font-size: 13px;
+      line-height: 1.2;
+      margin: 0;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .module-item .count { display: none; }
     /* 激活项：粉色高亮 + 左边框强调 */
@@ -458,7 +463,7 @@
       box-shadow: inset 3px 0 0 var(--pink-3);
     }
     .module-item.active .name { color: var(--pink-3); font-weight: 600; }
-    /* 内容区 */
+    /* 内容区：60% 宽，点一个模块在这里添加内容 */
     .content {
       padding: 12px;
       border-radius: 0;
