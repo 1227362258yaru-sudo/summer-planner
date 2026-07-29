@@ -391,43 +391,60 @@
   }
   /* 移动端 */
   @media (max-width: 768px) {
-    .app { padding: 10px 10px 90px; }
-    .layout { grid-template-columns: 1fr; }
+    .app { padding: 0 0 20px; }
+    .layout { grid-template-columns: 1fr; gap: 0; }
+    .topbar {
+      border-radius: 0;
+      margin: 0;
+      padding: 12px 14px;
+    }
+    .topbar .title { font-size: 16px; }
+    /* 顶部导航栏：总览在最左，横向滚动 */
     .sidebar {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      top: auto;
-      max-height: 60px;
-      padding: 8px 6px;
-      border-radius: 18px 18px 0 0;
+      position: sticky;
+      top: 0;
+      left: 0; right: 0;
+      max-height: none;
+      padding: 8px 8px;
+      border-radius: 0;
       display: flex;
       gap: 4px;
       overflow-x: auto;
+      overflow-y: hidden;
       z-index: 100;
-      box-shadow: 0 -4px 16px rgba(255, 155, 179, 0.2);
+      box-shadow: 0 2px 10px rgba(255, 155, 179, 0.15);
+      margin: 0;
+      background: var(--white);
+      /* 隐藏滚动条但保留滚动 */
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
+    .sidebar::-webkit-scrollbar { display: none; }
     .sidebar h3, .module-section .section-title, .total-count { display: none; }
+    .module-section {
+      display: contents;
+      margin: 0; padding: 0; border: none;
+    }
     .module-item {
       flex: 0 0 auto;
       flex-direction: column;
       gap: 2px;
-      padding: 6px 10px;
+      padding: 6px 12px;
       margin: 0;
-      min-width: 60px;
+      min-width: 56px;
       text-align: center;
+      border-radius: 10px;
     }
-    .module-item .name { font-size: 11px; }
+    .module-item .name { font-size: 10px; }
     .module-item .count { display: none; }
     .module-item .icon { font-size: 20px; }
-    .content { padding: 14px; }
-    .topbar { padding: 12px 14px; }
-    .topbar .title { font-size: 16px; }
-    /* 手机端：总览页所有卡片单列纵向排列 */
+    .module-item.active { background: var(--pink-soft); }
+    .content { padding: 14px; border-radius: 0; margin-top: 10px; }
+    /* 总览页手机端单列 */
     .stats-grid { grid-template-columns: 1fr; }
     .overview-grid { grid-template-columns: 1fr; }
     .task-grid { grid-template-columns: 1fr; }
     .form-row { grid-template-columns: 1fr; }
-    /* 单列时卡片内容横向布局，更紧凑 */
     .stat-card { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; }
     .stat-card .num { font-size: 24px; margin: 0; }
     .stat-card .label { margin: 0; }
@@ -638,6 +655,13 @@ function renderSidebar() {
       history.replaceState(null, '', '#' + state.current);
       renderSidebar();
       renderContent();
+      // 手机端：点击后将该模块滚入导航栏视野
+      if (window.innerWidth <= 768) {
+        const active = document.querySelector('.module-item.active');
+        if (active) active.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        // 内容滚到顶部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     };
   });
 
