@@ -389,33 +389,37 @@
     font-size: 12px; color: var(--text-2);
     margin-top: 4px;
   }
-  /* 移动端 */
+  /* 移动端：左右分栏，左列窄图标条 */
   @media (max-width: 768px) {
-    .app { padding: 0 0 20px; }
-    .layout { grid-template-columns: 1fr; gap: 0; }
+    .app { padding: 0; }
+    .layout {
+      grid-template-columns: 62px 1fr;
+      gap: 0;
+      min-height: calc(100vh - 70px);
+    }
     .topbar {
       border-radius: 0;
       margin: 0;
       padding: 12px 14px;
     }
     .topbar .title { font-size: 16px; }
-    /* 顶部导航栏：总览在最左，横向滚动 */
+    /* 左侧固定图标列：纵向滚动，总览在最上 */
     .sidebar {
       position: sticky;
-      top: 0;
-      left: 0; right: 0;
-      max-height: none;
-      padding: 8px 8px;
+      top: 70px;
+      align-self: start;
+      max-height: calc(100vh - 70px);
+      padding: 6px 0;
       border-radius: 0;
       display: flex;
-      gap: 4px;
-      overflow-x: auto;
-      overflow-y: hidden;
-      z-index: 100;
-      box-shadow: 0 2px 10px rgba(255, 155, 179, 0.15);
+      flex-direction: column;
+      gap: 2px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      z-index: 50;
+      box-shadow: 2px 0 8px rgba(255, 155, 179, 0.1);
       margin: 0;
       background: var(--white);
-      /* 隐藏滚动条但保留滚动 */
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
     }
@@ -425,21 +429,42 @@
       display: contents;
       margin: 0; padding: 0; border: none;
     }
+    /* 图标项：默认只显示图标，激活/长按时显示名称 */
     .module-item {
       flex: 0 0 auto;
       flex-direction: column;
       gap: 2px;
-      padding: 6px 12px;
+      padding: 8px 4px;
       margin: 0;
-      min-width: 56px;
+      min-width: 0;
+      width: 100%;
       text-align: center;
-      border-radius: 10px;
+      border-radius: 0;
+      position: relative;
+      cursor: pointer;
     }
-    .module-item .name { font-size: 10px; }
+    .module-item .icon { font-size: 22px; }
+    .module-item .name {
+      font-size: 9px;
+      line-height: 1.1;
+      margin-top: 2px;
+      word-break: break-all;
+      max-width: 56px;
+    }
     .module-item .count { display: none; }
-    .module-item .icon { font-size: 20px; }
-    .module-item.active { background: var(--pink-soft); }
-    .content { padding: 14px; border-radius: 0; margin-top: 10px; }
+    /* 激活项：粉色高亮 + 左边框强调 */
+    .module-item.active {
+      background: var(--pink-soft);
+      box-shadow: inset 3px 0 0 var(--pink-3);
+    }
+    .module-item.active .name { color: var(--pink-3); font-weight: 600; }
+    /* 内容区 */
+    .content {
+      padding: 12px;
+      border-radius: 0;
+      margin: 0;
+      min-height: calc(100vh - 70px);
+    }
     /* 总览页手机端单列 */
     .stats-grid { grid-template-columns: 1fr; }
     .overview-grid { grid-template-columns: 1fr; }
@@ -655,10 +680,10 @@ function renderSidebar() {
       history.replaceState(null, '', '#' + state.current);
       renderSidebar();
       renderContent();
-      // 手机端：点击后将该模块滚入导航栏视野
+      // 手机端：点击后将该模块滚入侧栏视野，内容滚到顶部
       if (window.innerWidth <= 768) {
         const active = document.querySelector('.module-item.active');
-        if (active) active.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         // 内容滚到顶部
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
