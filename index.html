@@ -422,8 +422,18 @@
     .content { padding: 14px; }
     .topbar { padding: 12px 14px; }
     .topbar .title { font-size: 16px; }
-    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+    /* 手机端：总览页所有卡片单列纵向排列 */
+    .stats-grid { grid-template-columns: 1fr; }
+    .overview-grid { grid-template-columns: 1fr; }
+    .task-grid { grid-template-columns: 1fr; }
     .form-row { grid-template-columns: 1fr; }
+    /* 单列时卡片内容横向布局，更紧凑 */
+    .stat-card { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; }
+    .stat-card .num { font-size: 24px; margin: 0; }
+    .stat-card .label { margin: 0; }
+    .overview-card { display: flex; align-items: center; justify-content: space-between; }
+    .overview-card > *:not(.progress) { margin: 0; }
+    .overview-card .progress { width: 40%; margin: 0; }
   }
   /* 暗色模式自动适配 */
   @media (prefers-color-scheme: dark) {
