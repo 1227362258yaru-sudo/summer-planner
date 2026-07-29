@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#ffd6e0" />
+<meta name="description" content="高职教师暑假生活管理工作台：备课、软考高级、Codex自学、运动增肌" />
+<!-- PWA -->
+<link rel="manifest" href="manifest.json" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="地球online" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
+<title>地球online · 暑假生活管理工作台</title>
+<style>
+  :root {
+    --bg-1: #ffe4ec;
+    --bg-2: #fff5f8;
+    --pink-1: #ffd6e0;
+    --pink-2: #ffc1d1;
+    --pink-3: #ff9bb3;
+    --pink-soft: #fff0f4;
+    --text-1: #2b2b2b;
+    --text-2: #6b6b6b;
+    --text-mute: #a9a9a9;
+    --border: #f4d4de;
+    --white: #ffffff;
+    --shadow: 0 6px 20px rgba(255, 155, 179, 0.15);
+    --radius: 18px;
+    --radius-sm: 12px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-1);
+    background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+  }
+  body {
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  /* 顶部状态栏模拟 */
+  .status-bar {
+    display: none;
+  }
+  /* 主容器 */
+  .app {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 16px 14px 80px;
+  }
+  /* 头部 */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+  }
+  .topbar .logo-wrap { display: flex; align-items: center; gap: 12px; }
+  .topbar .logo {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffd6e0, #ff9bb3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+  }
+  .topbar .title { font-weight: 700; font-size: 18px; }
+  .topbar .subtitle { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+  .topbar .clock { text-align: right; }
+  .topbar .clock .time { font-weight: 700; font-size: 18px; }
+  .topbar .clock .date { font-size: 11px; color: var(--text-2); margin-top: 2px; }
+  .topbar .countdown {
+    margin-top: 6px;
+    font-size: 12px;
+    background: var(--pink-soft);
+    color: var(--pink-3);
+    padding: 3px 10px;
+    border-radius: 999px;
+    display: inline-block;
+  }
+  /* 主布局 */
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 14px;
+  }
+  /* 侧边栏 */
+  .sidebar {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 14px 10px;
+    box-shadow: var(--shadow);
+    height: fit-content;
+    position: sticky;
+    top: 14px;
+    max-height: calc(100vh - 28px);
+    overflow-y: auto;
+  }
+  .sidebar h3 {
+    margin: 4px 8px 10px;
+    font-size: 13px;
+    color: var(--text-2);
+    font-weight: 500;
+  }
+  .module-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 4px;
+    position: relative;
+  }
+  .module-item:hover { background: var(--pink-soft); }
+  .module-item.active {
+    background: var(--pink-soft);
+    color: var(--pink-3);
+    font-weight: 600;
+  }
+  .module-item .icon {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .module-item .name { flex: 1; font-size: 14px; }
+  .module-item .count {
+    font-size: 12px;
+    color: var(--text-mute);
+    background: var(--bg-2);
+    padding: 2px 8px;
+    border-radius: 999px;
+    min-width: 24px;
+    text-align: center;
+  }
+  .module-item.active .count {
+    background: var(--pink-2);
+    color: var(--white);
+  }
+  .module-section {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+  }
+  .module-section .section-title {
+    font-size: 11px;
+    color: var(--pink-3);
+    font-weight: 600;
+    padding: 4px 8px;
+  }
+  .total-count {
+    margin-top: 10px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--text-2);
+    border-top: 1px solid var(--border);
+  }
+  /* 主内容区 */
+  .content {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 18px;
+    box-shadow: var(--shadow);
+    min-height: 500px;
+  }
+  .content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .content-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 18px; font-weight: 700;
+  }
+  .content-title .icon { font-size: 22px; }
+  .content-date { font-size: 12px; color: var(--text-2); }
+  /* 统计卡片网格 */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .stat-card {
+    background: var(--pink-soft);
+    border-radius: var(--radius-sm);
+    padding: 16px 10px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  .stat-card .num {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--pink-3);
+    line-height: 1;
+  }
+  .stat-card .label {
+    font-size: 12px;
+    color: var(--text-2);
+    margin-top: 6px;
+  }
+  /* 表单 */
+  .form-section {
+    background: var(--pink-soft);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+  }
+  .form-section .form-title {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--pink-3);
+    font-weight: 600;
+    margin-bottom: 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .form-section.collapsed .form-body { display: none; }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .form-row.single { grid-template-columns: 1fr; }
+  .form-field label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-2);
+    margin-bottom: 4px;
+  }
+  .form-field input, .form-field select, .form-field textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: var(--white);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    outline: none;
+    color: var(--text-1);
+    font-family: inherit;
+  }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+    border-color: var(--pink-3);
+  }
+  .form-field textarea { resize: vertical; min-height: 70px; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    background: linear-gradient(135deg, var(--pink-2), var(--pink-3));
+    color: var(--white);
+    border: none;
+    padding: 11px 18px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(255, 155, 179, 0.3);
+    transition: transform 0.15s;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-block { width: 100%; }
+  .btn-ghost {
+    background: var(--white);
+    color: var(--pink-3);
+    border: 1px solid var(--pink-2);
+    box-shadow: none;
+  }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-danger { background: #ff6b8a; }
+  /* 列表 */
+  .records { display: flex; flex-direction: column; gap: 10px; }
+  .record-item {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .record-item .meta { flex: 1; min-width: 0; }
+  .record-item .meta .t { font-size: 14px; font-weight: 600; }
+  .record-item .meta .d { font-size: 12px; color: var(--text-2); margin-top: 3px; }
+  .record-item .meta .note { font-size: 12px; color: var(--text-2); margin-top: 3px; }
+  .record-item .actions { display: flex; gap: 6px; }
+  .icon-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .icon-btn:hover { color: var(--pink-3); border-color: var(--pink-3); }
+  /* 任务类型标签 */
+  .tag {
+    display: inline-block;
+    background: var(--pink-soft);
+    color: var(--pink-3);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    margin-right: 4px;
+  }
+  .tag.green { background: #e6f7ec; color: #2da66a; }
+  .tag.blue { background: #e6f0ff; color: #2c6fd6; }
+  .tag.purple { background: #f0e6ff; color: #6b3fcf; }
+  .tag.orange { background: #fff0e6; color: #d97a2c; }
+  /* 进度条 */
+  .progress {
+    background: var(--bg-2);
+    border-radius: 999px;
+    height: 8px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+  .progress .bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--pink-2), var(--pink-3));
+    border-radius: 999px;
+    transition: width 0.3s;
+  }
+  /* 空状态 */
+  .empty {
+    text-align: center;
+    color: var(--text-mute);
+    padding: 40px 20px;
+    font-size: 14px;
+  }
+  .empty .emoji { font-size: 36px; margin-bottom: 10px; }
+  /* 概览页 */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .overview-card {
+    background: linear-gradient(135deg, var(--pink-soft), #fff);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+  }
+  .overview-card .title {
+    font-size: 13px; color: var(--text-2);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .overview-card .num {
+    font-size: 28px; font-weight: 700; color: var(--pink-3);
+    margin-top: 8px;
+  }
+  .overview-card .sub {
+    font-size: 11px; color: var(--text-mute);
+    margin-top: 4px;
+  }
+  /* 仪表盘任务 */
+  .task-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+  }
+  .task-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+  }
+  .task-card h4 {
+    margin: 0 0 10px;
+    font-size: 15px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .task-card .stat {
+    display: flex; justify-content: space-between;
+    font-size: 12px; color: var(--text-2);
+    margin-top: 4px;
+  }
+  /* 移动端 */
+  @media (max-width: 768px) {
+    .app { padding: 10px 10px 90px; }
+    .layout { grid-template-columns: 1fr; }
+    .sidebar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      top: auto;
+      max-height: 60px;
+      padding: 8px 6px;
+      border-radius: 18px 18px 0 0;
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      z-index: 100;
+      box-shadow: 0 -4px 16px rgba(255, 155, 179, 0.2);
+    }
+    .sidebar h3, .module-section .section-title, .total-count { display: none; }
+    .module-item {
+      flex: 0 0 auto;
+      flex-direction: column;
+      gap: 2px;
+      padding: 6px 10px;
+      margin: 0;
+      min-width: 60px;
+      text-align: center;
+    }
+    .module-item .name { font-size: 11px; }
+    .module-item .count { display: none; }
+    .module-item .icon { font-size: 20px; }
+    .content { padding: 14px; }
+    .topbar { padding: 12px 14px; }
+    .topbar .title { font-size: 16px; }
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+    .form-row { grid-template-columns: 1fr; }
+  }
+  /* 暗色模式自动适配 */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --white: #2b2326;
+      --bg-1: #1f1a1c;
+      --bg-2: #2a2225;
+      --text-1: #f0e6ea;
+      --text-2: #c4b8bd;
+      --text-mute: #8b7e83;
+      --border: #443339;
+      --pink-soft: #3a2a30;
+      --shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+  }
+  /* 滚动条 */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-thumb { background: var(--pink-2); border-radius: 3px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  /* 模态 */
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 200;
+    padding: 16px;
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 20px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  .modal h3 { margin-top: 0; }
+  .modal .close {
+    float: right; cursor: pointer; font-size: 22px;
+    color: var(--text-mute); line-height: 1;
+  }
+  /* 通知 */
+  .toast {
+    position: fixed; bottom: 80px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 300;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- 顶部 -->
+  <div class="topbar">
+    <div class="logo-wrap">
+      <div class="logo">🌍</div>
+      <div>
+        <div class="title">地球online</div>
+        <div class="subtitle">个人生活管理工作台</div>
+      </div>
+    </div>
+    <div class="clock">
+      <div class="time" id="clockTime">--:--</div>
+      <div class="date" id="clockDate"></div>
+      <div class="countdown" id="countdown">距暑假结束还有 -- 天</div>
+    </div>
+  </div>
+
+  <!-- 主体 -->
+  <div class="layout">
+    <!-- 侧边栏 -->
+    <aside class="sidebar" id="sidebar">
+      <h3>全部模块</h3>
+      <div id="moduleList"></div>
+      <div class="total-count" id="totalCount">共 0 条记录</div>
+    </aside>
+
+    <!-- 内容区 -->
+    <main class="content" id="content">
+      <!-- 动态渲染 -->
+    </main>
+  </div>
+</div>
+
+<!-- 模态框 -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== 数据层 ===================== */
+const STORAGE_KEY = 'earth_online_summer_2026_v1';
+const SUMMER_END = new Date('2026-08-20T23:59:59');
+
+// 模块定义
+const MODULES = [
+  { id: 'overview', name: '总览', icon: '🏠', group: 'main', isOverview: true },
+  // 三大任务
+  { id: 'teach', name: '移动开发备课', icon: '📱', group: 'task' },
+  { id: 'ruankao', name: '软考高级', icon: '📚', group: 'task' },
+  { id: 'codex', name: 'Codex自学', icon: '🤖', group: 'task' },
+  // 截图17个模块
+  { id: 'sport', name: '运动记录', icon: '🏃‍♀️', group: 'life' },
+  { id: 'period', name: '经期记录', icon: '🌸', group: 'life' },
+  { id: 'sleep', name: '睡眠检测', icon: '😴', group: 'life' },
+  { id: 'travel', name: '旅行计划', icon: '✈️', group: 'life' },
+  { id: 'shopping', name: '购物清单', icon: '🛒', group: 'life' },
+  { id: 'wishlist', name: '好物记录', icon: '⭐', group: 'life' },
+  { id: 'english', name: '英语学习', icon: '🔤', group: 'life' },
+  { id: 'mood', name: '每日心情', icon: '😊', group: 'life' },
+  { id: 'dailyq', name: '每日选题', icon: '💡', group: 'life' },
+  { id: 'news', name: '新闻重点', icon: '📰', group: 'life' },
+  { id: 'hot', name: '爆款笔记', icon: '🔥', group: 'life' },
+  { id: 'food', name: '饮食记录', icon: '🍱', group: 'life' },
+  { id: 'water', name: '喝水打卡', icon: '💧', group: 'life' },
+  { id: 'reading', name: '阅读书单', icon: '📖', group: 'life' },
+  { id: 'meditation', name: '冥想放松', icon: '🧘‍♀️', group: 'life' },
+  { id: 'photo', name: '每日一拍', icon: '📷', group: 'life' },
+  { id: 'todo', name: '待办清单', icon: '✅', group: 'life' },
+];
+
+// 默认数据
+function getDefaultData() {
+  const now = new Date();
+  const data = {};
+  MODULES.filter(m => !m.isOverview).forEach(m => { data[m.id] = []; });
+  return data;
+}
+
+// 加载数据
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return getDefaultData();
+    const parsed = JSON.parse(raw);
+    // 补齐缺失的模块
+    const def = getDefaultData();
+    Object.keys(def).forEach(k => { if (!parsed[k]) parsed[k] = []; });
+    return parsed;
+  } catch (e) {
+    return getDefaultData();
+  }
+}
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data));
+}
+
+let state = {
+  data: loadData(),
+  current: 'overview',
+  modal: null,
+};
+
+const todayStr = () => {
+  const d = new Date();
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+};
+const nowISO = () => new Date().toISOString();
+
+/* ===================== UI 渲染 ===================== */
+function renderSidebar() {
+  const groups = {
+    main: { title: '📌 主面板', items: [] },
+    task: { title: '🎯 暑假三大任务', items: [] },
+    life: { title: '🌸 生活记录', items: [] },
+  };
+  MODULES.forEach(m => { if (groups[m.group]) groups[m.group].items.push(m); });
+
+  const html = Object.values(groups).map(g => `
+    <div class="module-section">
+      <div class="section-title">${g.title}</div>
+      ${g.items.map(m => {
+        const count = m.isOverview ? '' : (state.data[m.id] ? state.data[m.id].length : 0);
+        return `<div class="module-item ${state.current === m.id ? 'active' : ''}" data-id="${m.id}">
+          <div class="icon">${m.icon}</div>
+          <div class="name">${m.name}</div>
+          ${m.isOverview ? '' : `<div class="count">${count}</div>`}
+        </div>`;
+      }).join('')}
+    </div>
+  `).join('');
+  document.getElementById('moduleList').innerHTML = html;
+
+  // 绑定点击
+  document.querySelectorAll('.module-item').forEach(el => {
+    el.onclick = () => {
+      state.current = el.dataset.id;
+      // 同步 hash（不触发 hashchange，用 history.replaceState）
+      history.replaceState(null, '', '#' + state.current);
+      renderSidebar();
+      renderContent();
+    };
+  });
+
+  // 总数
+  const total = Object.values(state.data).reduce((s, arr) => s + arr.length, 0);
+  document.getElementById('totalCount').textContent = `共 ${total} 条记录`;
+}
+
+function renderContent() {
+  const m = MODULES.find(x => x.id === state.current);
+  const c = document.getElementById('content');
+  if (m.isOverview) {
+    c.innerHTML = renderOverview();
+    bindOverview();
+  } else {
+    c.innerHTML = renderModule(m);
+    bindModule(m);
+  }
+}
+
+/* ===================== 总览页 ===================== */
+function renderOverview() {
+  // 三大任务统计
+  const teach = state.data.teach || [];
+  const teachDone = teach.filter(t => t.status === 'done').length;
+  const teachHours = teach.reduce((s, t) => s + (parseFloat(t.hours) || 0), 0);
+
+  const rk = state.data.ruankao || [];
+  const rkDone = rk.filter(t => t.status === 'done').length;
+  const rkHours = rk.reduce((s, t) => s + (parseFloat(t.hours) || 0), 0);
+
+  const cx = state.data.codex || [];
+  const cxDone = cx.filter(t => t.status === 'done').length;
+  const cxHours = cx.reduce((s, t) => s + (parseFloat(t.hours) || 0), 0);
+
+  const sport = state.data.sport || [];
+  const sportTotal = sport.reduce((s, t) => s + (parseFloat(t.duration) || 0), 0);
+
+  // 总记录数
+  const total = Object.values(state.data).reduce((s, arr) => s + arr.length, 0);
+
+  // 倒计时
+  const now = new Date();
+  const left = Math.max(0, Math.ceil((SUMMER_END - now) / 86400000));
+  const totalDays = Math.ceil((SUMMER_END - new Date('2026-07-01')) / 86400000);
+  const passed = totalDays - left;
+
+  return `
+    <div class="content-header">
+      <div class="content-title"><span class="icon">🏠</span><span>暑假总览</span></div>
+      <div class="content-date">${todayStr()}</div>
+    </div>
+
+    <div class="overview-grid">
+      <div class="overview-card">
+        <div class="title">⏳ 暑假进度</div>
+        <div class="num">${passed}/${totalDays}</div>
+        <div class="sub">还剩 ${left} 天</div>
+        <div class="progress"><div class="bar" style="width:${(passed/totalDays*100).toFixed(1)}%"></div></div>
+      </div>
+      <div class="overview-card">
+        <div class="title">📊 总记录数</div>
+        <div class="num">${total}</div>
+        <div class="sub">条生活/学习记录</div>
+      </div>
+      <div class="overview-card">
+        <div class="title">🏃 本月运动</div>
+        <div class="num">${sportTotal}</div>
+        <div class="sub">分钟 · 增肌进行中</div>
+      </div>
+      <div class="overview-card">
+        <div class="title">📚 软考学习</div>
+        <div class="num">${rkHours}h</div>
+        <div class="sub">完成 ${rkDone} 项</div>
+      </div>
+    </div>
+
+    <h3 style="margin: 18px 0 10px; font-size: 15px; color: var(--text-2);">🎯 三大任务进度</h3>
+    <div class="task-grid">
+      <div class="task-card">
+        <h4>📱 移动应用开发备课</h4>
+        <div class="stat"><span>学习时长</span><span>${teachHours} 小时</span></div>
+        <div class="progress"><div class="bar" style="width:${Math.min(100, teachHours/30*100).toFixed(1)}%"></div></div>
+        <div class="stat" style="margin-top:8px"><span>任务完成</span><span>${teachDone}/${teach.length}</span></div>
+        <div class="progress"><div class="bar" style="width:${teach.length ? (teachDone/teach.length*100).toFixed(1) : 0}%"></div></div>
+      </div>
+      <div class="task-card">
+        <h4>📚 软考高级学习</h4>
+        <div class="stat"><span>学习时长</span><span>${rkHours} 小时</span></div>
+        <div class="progress"><div class="bar" style="width:${Math.min(100, rkHours/60*100).toFixed(1)}%"></div></div>
+        <div class="stat" style="margin-top:8px"><span>任务完成</span><span>${rkDone}/${rk.length}</span></div>
+        <div class="progress"><div class="bar" style="width:${rk.length ? (rkDone/rk.length*100).toFixed(1) : 0}%"></div></div>
+      </div>
+      <div class="task-card">
+        <h4>🤖 Codex自学</h4>
+        <div class="stat"><span>学习时长</span><span>${cxHours} 小时</span></div>
+        <div class="progress"><div class="bar" style="width:${Math.min(100, cxHours/30*100).toFixed(1)}%"></div></div>
+        <div class="stat" style="margin-top:8px"><span>任务完成</span><span>${cxDone}/${cx.length}</span></div>
+        <div class="progress"><div class="bar" style="width:${cx.length ? (cxDone/cx.length*100).toFixed(1) : 0}%"></div></div>
+      </div>
+    </div>
+
+    <h3 style="margin: 22px 0 10px; font-size: 15px; color: var(--text-2);">⚡ 快速添加</h3>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="btn btn-sm" onclick="quickAdd('teach')">+ 备课记录</button>
+      <button class="btn btn-sm" onclick="quickAdd('ruankao')">+ 软考学习</button>
+      <button class="btn btn-sm" onclick="quickAdd('codex')">+ Codex学习</button>
+      <button class="btn btn-sm" onclick="quickAdd('sport')">+ 运动</button>
+      <button class="btn btn-sm btn-ghost" onclick="exportData()">📤 导出数据</button>
+      <button class="btn btn-sm btn-ghost" onclick="importData()">📥 导入数据</button>
+      <button class="btn btn-sm btn-ghost" onclick="resetData()">🗑 重置</button>
+    </div>
+
+    <!-- PWA 安装引导 -->
+    <div id="installBanner" style="margin-top:14px; padding:12px 14px; background:linear-gradient(135deg, #ffd6e0, #ff9bb3); color:#fff; border-radius:14px; font-size:13px; align-items:center; gap:10px; display:none;">
+      <span style="font-size:22px;">📲</span>
+      <div style="flex:1;">
+        <div style="font-weight:600;">安装到手机桌面</div>
+        <div style="font-size:11px; opacity:0.9; margin-top:2px;">像 App 一样使用，离线也能打开</div>
+      </div>
+      <button class="btn btn-sm" style="background:#fff; color:#ff9bb3;" onclick="deferredPrompt && deferredPrompt.prompt();">安装</button>
+    </div>
+  `;
+}
+
+function bindOverview() {}
+
+// PWA 安装提示：捕获 beforeinstallprompt 事件
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // 显示安装横幅
+  const banner = document.getElementById('installBanner');
+  if (banner) banner.style.display = 'flex';
+});
+
+/* ===================== 通用模块渲染 ===================== */
+// 不同模块的字段定义
+const SCHEMAS = {
+  teach: {
+    title: '移动应用开发备课',
+    icon: '📱',
+    fields: [
+      { k: 'date', l: '日期', t: 'date', def: todayStr() },
+      { k: 'topic', l: '备课主题', t: 'text', ph: '例如：Flutter 状态管理' },
+      { k: 'hours', l: '学习时长（小时）', t: 'number', ph: '2' },
+      { k: 'content', l: '内容/笔记', t: 'textarea', ph: '今天学了什么...' },
+      { k: 'status', l: '状态', t: 'select', opts: ['计划中', '进行中', '已完成'], def: '进行中' },
+    ],
+    render: (item) => `
+      <div class="meta">
+        <div class="t">${item.topic || '未命名'} <span class="tag ${item.status === '已完成' ? 'green' : item.status === '进行中' ? 'blue' : 'orange'}">${item.status || '计划中'}</span></div>
+        <div class="d">📅 ${item.date} · ⏱ ${item.hours || 0} 小时</div>
+        ${item.content ? `<div class="note">${escapeHtml(item.content)}</div>` : ''}
+      </div>
+    `
+  },
+  ruankao: {
+    title: '软考高级',
+    icon: '📚',
+    fields: [
+      { k: 'date', l: '日期', t: 'date', def: todayStr() },
+      { k: 'topic', l: '学习内容', t: 'text', ph: '如：信息系统项目管理 - 范围管理' },
+      { k: 'hours', l: '时长（小时）', t: 'number', ph: '1.5' },
+      { k: 'content', l: '笔记/重点', t: 'textarea', ph: '今日要点...' },
+      { k: 'status', l: '状态', t: 'select', opts: ['计划中', '进行中', '已完成'], def: '进行中' },
+    ],
+    render: (item) => `
+      <div class="meta">
+        <div class="t">${item.topic || '未命名'} <span class="tag ${item.status === '已完成' ? 'green' : 'blue'}">${item.status || '进行中'}</span></div>
+        <div class="d">📅 ${item.date} · ⏱ ${item.hours || 0} 小时</div>
+        ${item.content ? `<div class="note">${escapeHtml(item.content)}</div>` : ''}
+      </div>
+    `
+  },
+  codex: {
+    title: 'Codex自学',
+    icon: '🤖',
+    fields: [
+      { k: 'date', l: '日期', t: 'date', def: todayStr() },
+      { k: 'topic', l: '学习主题', t: 'text', ph: '如：Codex CLI 用法' },
+      { k: 'hours', l: '时长（小时）', t: 'number', ph: '1' },
+      { k: 'content', l: '心得/笔记', t: 'textarea', ph: '今天学到的关键点...' },
+      { k: 'status', l: '状态', t: 'select', opts: ['计划中', '进行中', '已完成'], def: '进行中' },
+    ],
+    render: (item) => `
+      <div class="meta">
+        <div class="t">${item.topic || '未命名'} <span class="tag ${item.status === '已完成' ? 'green' : 'blue'}">${item.status || '进行中'}</span></div>
+        <div class="d">📅 ${item.date} · ⏱ ${item.hours || 0} 小时</div>
+        ${item.content ? `<div class="note">${escapeHtml(item.content)}</div>` : ''}
+      </div>
+    `
+  },
+  sport: {
+    title: '运动记录',
+    icon: '🏃‍♀️',
+    fields: [
+      { k: 'date', l: '日期', t: 'date', def: todayStr() },
+      { k: 'type', l: '类别', t: 'select', opts: ['游泳', '爬山', '徒步', '散步', '遛狗', '跑步', '力量训练', '瑜伽', '骑行', '其他'], def: '游泳' },
+      { k: 'duration', l: '时长（分钟）', t: 'number', def: 45, ph: '45' },
+      { k: 'note', l: '备注', t: 'text', ph: '水温适中' },
+    ],
+    render: (item) => `
+      <div class="meta">
+        <div class="t">${item.type} <span class="tag">${item.duration || 0} 分钟</span></div>
+        <div class="d">📅 ${item.date}</div>
+        ${item.note ? `<div class="note">${escapeHtml(item.note)}</div>` : ''}
+      </div>
+    `
+  },
+  period: {
+    title: '经期记录',
+    icon: '🌸',
+    fields: [
+      { k: 'date', l: '日期', t: 'date', def: todayStr() },
+      { k: 'status', l: '状态', t: 'select', opts: ['月经期', '排卵期', '安全期', '经前'], def: '月经期' },
+      { k: 'note', l: '症状/备注', t: 'text', ph: '正常/腹痛/...' },
+    ],
+    render: (item) => `<div class="meta"><div class="t">${item.status}</div><div class="d">📅 ${item.date}</div>${item.note?`<div class="note">${escapeHtml(item.note)}</div>`:''}</div>`
+  },
+  sleep: {
+    title: '睡眠检测',
+    icon: '😴',
+    fields: [
+      { k: 'date', l: '日期', t: 'date', def: todayStr() },
+      { k: 'bedtime', l: '入睡时间', t: 'time', def: '23:30' },
+      { k: 'waketime', l: '起床时间', t: 'time', def: '07:00' },
+      { k: 'quality', l: '睡眠质量', t: 'select', opts: ['很好', '一般', '较差'], def: '一般' },
+      { k: 'note', l: '备注', t: 'text' },
+    ],
+    render: (item) => {
+      const dur = calcSleepDuration(item.bedtime, item.waketime);
+      return `<div class="meta"><div class="t">${item.bedtime} → ${item.waketime} <span class="tag">${dur}</span></div><div class="d">📅 ${item.date} · 质量: ${item.quality}</div>${item.note?`<div class="note">${escapeHtml(item.note)}</div>`:''}</div>`;
+    }
+  },
+  travel: {
+    title: '旅行计划',
+    icon: '✈️',
+    fields: [
+      { k: 'date', l: '日期', t: 'date', def: todayStr() },
+      { k: 'destination', l: '目的地', t: 'text', ph: '如：青岛' },
+      { k: 'days', l: '天数', t: 'number', ph: '3' },
+      { k: 'budget', l: '预算', t: 'number', ph: '2000' },
+      { k: 'note', l: '备注', t: 'textarea' },
+    ],
+    render: (item) => `<div class="meta"><div class="t">${item.destination} <span class="tag">${item.days}天</span> <span class="tag green">¥${item.budget || 0}</span></div><div class="d">📅 ${item.date}</div>${item.note?`<div class="note">${escapeHtml(item.note)}</div>`:''}</div>`
+  },
+  shopping: {
+    title: '购物清单',
+    icon: '🛒',
+    fields: [
+      { k: 'date', l: '日期', t: 'date', def: todayStr() },
+      { k: 'item', l: '物品', t: 'text', ph: '如：哑铃' },
+      { k: 'price', l: '价格', t: 'number', ph: '199' },
+      { k: 'status', l: '状态', t: 'select', opts: ['待买', '已买'], def: '待买' },
+    ],
+    render: (item) => `<div class="meta"><div class="t">${item.item} <span class="tag ${item.status === '已买' ? 'green' : 'orange'}">${item.status}</span></div><div class="d">📅 ${item.date} · ¥${item.price || 0}</div></div>`
+  },
+  wishlist: {
+    title: '好物记录',
+    icon: '⭐',
+    fields: [
+      { k: 'date', l: '日期', t: 'date', def: todayStr() },
+      { k: 'name', l: '好物名称', t: 'text', ph: '如：降噪耳机' },
+      { k: 'reason', l: '推荐理由', t: 'textarea' },
+    ],
+    render: (item) => `<div class="meta"><div class="t">${item.name}</div><div class="d">📅 ${item.date}</div>${item.reason?`<div class="note">${escapeHtml(item.reason)}</div>`:''}</div>`
+  },
+  english: {
+    title: '英语学习',
+    icon: '🔤',
+    fields: [
+      { k: 'date', l: '日期', t: 'date', def: todayStr() },
+      { k: 'content', l: '学习内容', t: 'text', ph: '如：英语单词 50 个' },
+      { k: 'duration', l: '时长（分钟）', t: 'number', ph: '30' },
+      { k: 'note', l: '备注', t: 'text' },
+    ],
+    render: (item) => `<div class="meta"><div class="t">${item.content}</div><div class="d">📅 ${item.date} · ${item.duration || 0} 分钟</div>${item.note?`<div class="note">${escapeHtml(item.note)}</div>`:''}</div>`
+  },
+  mood: {
+    title: '每日心情',
+    icon: '😊',
+    fields: [
+      { k: 'date', l: '日期', t: 'date', def: todayStr() },
+      { k: 'mood', l: '心情', t: 'select', opts: ['😄 超开心', '😊 开心', '😐 一般', '😔 低落', '😡 烦躁'], def: '😊 开心' },
+      { k: 'note', l: '想说点什么', t: 'textarea' },
+    ],
+    render: (item) => `<div class="meta"><div class="t">${item.mood}</div><div class="d">📅 ${item.date}</div>${item.note?`<div class="note">${escapeHtml(item.note)}</div>`:''}</div>`
+  },
+  dailyq: {
+    title: '每日选题',
+    icon: '💡',
+    fields: [
+      { k: 'date', l: '日期', t: 'date', def: todayStr() },
+      { k: 'question', l: '题目/问题', t: 'text', ph: '今日思考...' },
+      { k: 'answer', l: '答案/想法', t: 'textarea' },
+    ],
+    render: (item) => `<div class="meta"><div class="t">${item.question}</div><div class="d">📅 ${item.date}</div>${item.answer?`<div class="note">${escapeHtml(item.answer)}</div>`:''}</div>`
+  },
+  news: {
+    title: '新闻重点',
+    icon: '📰',
+    fields: [
+      { k: 'date', l: '日期', t: 'date', def: todayStr() },
+      { k: 'title', l: '新闻标题', t: 'text' },
+      { k: 'summary', l: '重点摘要', t: 'textarea' },
+      { k: 'tag', l: '标签', t: 'text', ph: '科技/教育/...' },
+    ],
+    render: (item) => `<div class="meta"><div class="t">${item.title} ${item.tag?`<span class="tag">${item.tag}</span>`:''}</div><div class="d">📅 ${item.date}</div>${item.summary?`<div class="note">${escapeHtml(item.summary)}</div>`:''}</div>`
+  },
+  hot: {
+    title: '爆款笔记',
+    icon: '🔥',
+    fields: [
+      { k: 'date', l: '日期', t: 'date', def: todayStr() },
+      { k: 'title', l: '标题', t: 'text' },
+      { k: 'platform', l: '平台', t: 'select', opts: ['小红书', '抖音', 'B站', '公众号', '其他'], def: '小红书' },
+      { k: 'reason', l: '爆款原因', t: 'textarea' },
+    ],
+    render: (item) => `<div class="meta"><div class="t">${item.title} <span class="tag orange">${item.platform}</span></div><div class="d">📅 ${item.date}</div>${item.reason?`<div class="note">${escapeHtml(item.reason)}</div>`:''}</div>`
+  },
+  food: {
+    title: '饮食记录',
+    icon: '🍱',
+    fields: [
+      { k: 'date', l: '日期', t: 'date', def: todayStr() },
+      { k: 'meal', l: '餐次', t: 'select', opts: ['早餐', '午餐', '晚餐', '加餐'], def: '午餐' },
+      { k: 'food', l: '吃了什么', t: 'text' },
+      { k: 'calorie', l: '热量(千卡)', t: 'number', ph: '500' },
+    ],
+    render: (item) => `<div class="meta"><div class="t">${item.meal}: ${item.food} <span class="tag">${item.calorie || 0} kcal</span></div><div class="d">📅 ${item.date}</div></div>`
+  },
+  water: {
+    title: '喝水打卡',
+    icon: '💧',
+    fields: [
+      { k: 'date', l: '日期', t: 'date', def: todayStr() },
+      { k: 'amount', l: '饮水量(ml)', t: 'number', ph: '500' },
+      { k: 'time', l: '时间', t: 'time', def: '14:00' },
+    ],
+    render: (item) => `<div class="meta"><div class="t">💧 ${item.amount || 0} ml <span class="tag">${item.time}</span></div><div class="d">📅 ${item.date}</div></div>`
+  },
+  reading: {
+    title: '阅读书单',
+    icon: '📖',
+    fields: [
+      { k: 'date', l: '日期', t: 'date', def: todayStr() },
+      { k: 'book', l: '书名', t: 'text' },
+      { k: 'pages', l: '页数', t: 'number', ph: '20' },
+      { k: 'thought', l: '感想', t: 'textarea' },
+    ],
+    render: (item) => `<div class="meta"><div class="t">${item.book} <span class="tag">${item.pages || 0} 页</span></div><div class="d">📅 ${item.date}</div>${item.thought?`<div class="note">${escapeHtml(item.thought)}</div>`:''}</div>`
+  },
+  meditation: {
+    title: '冥想放松',
+    icon: '🧘‍♀️',
+    fields: [
+      { k: 'date', l: '日期', t: 'date', def: todayStr() },
+      { k: 'duration', l: '时长（分钟）', t: 'number', ph: '15' },
+      { k: 'type', l: '类型', t: 'select', opts: ['正念冥想', '呼吸练习', '身体扫描', '白噪音', '其他'], def: '正念冥想' },
+    ],
+    render: (item) => `<div class="meta"><div class="t">${item.type} <span class="tag">${item.duration || 0} 分钟</span></div><div class="d">📅 ${item.date}</div></div>`
+  },
+  photo: {
+    title: '每日一拍',
+    icon: '📷',
+    fields: [
+      { k: 'date', l: '日期', t: 'date', def: todayStr() },
+      { k: 'title', l: '标题', t: 'text' },
+      { k: 'desc', l: '描述', t: 'textarea' },
+    ],
+    render: (item) => `<div class="meta"><div class="t">📷 ${item.title}</div><div class="d">📅 ${item.date}</div>${item.desc?`<div class="note">${escapeHtml(item.desc)}</div>`:''}</div>`
+  },
+  todo: {
+    title: '待办清单',
+    icon: '✅',
+    fields: [
+      { k: 'date', l: '日期', t: 'date', def: todayStr() },
+      { k: 'task', l: '任务', t: 'text' },
+      { k: 'priority', l: '优先级', t: 'select', opts: ['高', '中', '低'], def: '中' },
+      { k: 'status', l: '状态', t: 'select', opts: ['待办', '已完成'], def: '待办' },
+    ],
+    render: (item) => `<div class="meta"><div class="t">${item.task} <span class="tag ${item.priority === '高' ? 'orange' : item.priority === '中' ? 'blue' : ''}">${item.priority}</span> <span class="tag ${item.status === '已完成' ? 'green' : ''}">${item.status}</span></div><div class="d">📅 ${item.date}</div></div>`
+  },
+};
+
+function renderModule(m) {
+  const schema = SCHEMAS[m.id];
+  if (!schema) return '<div class="empty"><div class="emoji">🚧</div>模块加载中</div>';
+  const list = state.data[m.id] || [];
+  const stats = computeStats(m.id, list);
+  return `
+    <div class="content-header">
+      <div class="content-title"><span class="icon">${schema.icon}</span><span>${schema.title}</span></div>
+      <div class="content-date">${todayStr()}</div>
+    </div>
+    ${stats}
+    <div class="form-section" id="formSec">
+      <div class="form-title" id="formToggle">+ 新增${schema.title.replace(/.*?·/, '').replace('记录','').replace('计划','').replace('清单','').replace('书单','').replace('打卡','').replace('学习','').replace('检测','').replace('放松','').replace('笔记','').replace('选题','').replace('重点','').replace('记录','') || '记录'}<span style="margin-left:auto">▾</span></div>
+      <div class="form-body">
+        <form id="addForm">
+          ${schema.fields.map(f => renderField(f)).join('')}
+          <button type="submit" class="btn btn-block">保存记录</button>
+        </form>
+      </div>
+    </div>
+    <div class="records" id="recordList">
+      ${list.length === 0 ? '<div class="empty"><div class="emoji">✿</div>暂无记录，添加一条吧</div>' :
+        list.map((item, i) => `
+          <div class="record-item">
+            ${schema.render(item)}
+            <div class="actions">
+              <button class="icon-btn" onclick="deleteItem('${m.id}', ${i})" title="删除">🗑</button>
+            </div>
+          </div>
+        `).join('')}
+    </div>
+  `;
+}
+
+function renderField(f) {
+  const v = f.def !== undefined ? f.def : '';
+  let input = '';
+  if (f.t === 'select') {
+    input = `<select name="${f.k}">${f.opts.map(o => `<option ${o===v?'selected':''}>${o}</option>`).join('')}</select>`;
+  } else if (f.t === 'textarea') {
+    input = `<textarea name="${f.k}" placeholder="${f.ph||''}">${v}</textarea>`;
+  } else {
+    input = `<input type="${f.t}" name="${f.k}" value="${v}" placeholder="${f.ph||''}" />`;
+  }
+  const rowClass = (f.t === 'textarea' || f.t === 'text' || f.t === 'number' && f.k === 'amount') ? 'form-row single' : 'form-row';
+  return `<div class="${rowClass}"><div class="form-field"><label>${f.l}</label>${input}</div></div>`;
+}
+
+function computeStats(id, list) {
+  if (list.length === 0) return '';
+  switch (id) {
+    case 'teach': {
+      const done = list.filter(t => t.status === '已完成').length;
+      const hours = list.reduce((s, t) => s + (parseFloat(t.hours) || 0), 0);
+      return statGrid([{ n: list.length, l: '备课条目' }, { n: done, l: '已完成' }, { n: hours, l: '总学时' }]);
+    }
+    case 'ruankao': {
+      const done = list.filter(t => t.status === '已完成').length;
+      const hours = list.reduce((s, t) => s + (parseFloat(t.hours) || 0), 0);
+      return statGrid([{ n: list.length, l: '学习项' }, { n: done, l: '已完成' }, { n: hours, l: '总学时' }]);
+    }
+    case 'codex': {
+      const done = list.filter(t => t.status === '已完成').length;
+      const hours = list.reduce((s, t) => s + (parseFloat(t.hours) || 0), 0);
+      return statGrid([{ n: list.length, l: '学习项' }, { n: done, l: '已完成' }, { n: hours, l: '总学时' }]);
+    }
+    case 'sport': {
+      const types = ['游泳','爬山','徒步','散步','遛狗'];
+      const cards = types.map(t => ({ n: list.filter(x => x.type === t).reduce((s, x) => s + (parseFloat(x.duration) || 0), 0), l: t }));
+      return statGrid(cards);
+    }
+    case 'water': {
+      const total = list.reduce((s, x) => s + (parseFloat(x.amount) || 0), 0);
+      return statGrid([{ n: total, l: '总饮水量(ml)' }, { n: list.length, l: '打卡次数' }]);
+    }
+    case 'mood': {
+      const m = {};
+      list.forEach(x => { m[x.mood] = (m[x.mood] || 0) + 1; });
+      const top = Object.entries(m).sort((a, b) => b[1] - a[1])[0];
+      return statGrid([{ n: list.length, l: '记录次数' }, { n: top ? top[0] : '-', l: '最常心情' }]);
+    }
+    case 'english': {
+      const total = list.reduce((s, x) => s + (parseFloat(x.duration) || 0), 0);
+      return statGrid([{ n: total, l: '总时长(分钟)' }, { n: list.length, l: '学习次数' }]);
+    }
+    default:
+      return statGrid([{ n: list.length, l: '记录数' }]);
+  }
+}
+function statGrid(items) {
+  return `<div class="stats-grid">${items.map(it => `<div class="stat-card"><div class="num">${it.n}</div><div class="label">${it.l}</div></div>`).join('')}</div>`;
+}
+
+function bindModule(m) {
+  // 表单
+  const form = document.getElementById('addForm');
+  if (form) {
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const item = { _id: nowISO() };
+      fd.forEach((v, k) => { item[k] = v; });
+      state.data[m.id] = state.data[m.id] || [];
+      state.data[m.id].unshift(item);
+      saveData();
+      toast('已保存 ✨');
+      renderSidebar();
+      renderContent();
+    };
+  }
+  // 折叠
+  const t = document.getElementById('formToggle');
+  if (t) t.onclick = () => document.getElementById('formSec').classList.toggle('collapsed');
+}
+
+/* ===================== 操作 ===================== */
+window.quickAdd = (id) => {
+  state.current = id;
+  renderSidebar();
+  renderContent();
+  setTimeout(() => {
+    const fs = document.getElementById('formSec');
+    if (fs) fs.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 100);
+};
+
+window.deleteItem = (id, idx) => {
+  if (!confirm('确定要删除这条记录吗？')) return;
+  state.data[id].splice(idx, 1);
+  saveData();
+  toast('已删除');
+  renderSidebar();
+  renderContent();
+};
+
+window.exportData = () => {
+  const json = JSON.stringify(state.data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `earth_online_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('已导出 JSON ✨');
+};
+
+window.importData = () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const obj = JSON.parse(ev.target.result);
+        if (typeof obj !== 'object') throw new Error('格式错误');
+        if (confirm('导入将覆盖当前数据，是否继续？')) {
+          state.data = obj;
+          saveData();
+          renderSidebar();
+          renderContent();
+          toast('导入成功 ✨');
+        }
+      } catch (err) {
+        alert('文件格式错误');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+};
+
+window.resetData = () => {
+  if (confirm('确定要清空所有数据吗？此操作不可恢复！')) {
+    state.data = getDefaultData();
+    saveData();
+    renderSidebar();
+    renderContent();
+    toast('已重置');
+  }
+};
+
+/* ===================== 工具 ===================== */
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+function calcSleepDuration(bed, wake) {
+  if (!bed || !wake) return '--';
+  const [bh, bm] = bed.split(':').map(Number);
+  const [wh, wm] = wake.split(':').map(Number);
+  let mins = (wh * 60 + wm) - (bh * 60 + bm);
+  if (mins < 0) mins += 24 * 60;
+  return `${(mins / 60).toFixed(1)} 小时`;
+}
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+function tickClock() {
+  const d = new Date();
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  document.getElementById('clockTime').textContent = `${hh}:${mm}`;
+  const days = ['日','一','二','三','四','五','六'];
+  document.getElementById('clockDate').textContent = `${d.getMonth()+1}月${d.getDate()}日 周${days[d.getDay()]}`;
+  const left = Math.max(0, Math.ceil((SUMMER_END - d) / 86400000));
+  document.getElementById('countdown').textContent = `距暑假结束还有 ${left} 天`;
+}
+
+/* ===================== 初始化 ===================== */
+function init() {
+  // 支持 hash 路由：#teach / #sport 等（来自 PWA 快捷方式）
+  const hash = window.location.hash.replace('#', '');
+  if (hash && MODULES.some(m => m.id === hash)) {
+    state.current = hash;
+  }
+  tickClock();
+  setInterval(tickClock, 30000);
+  renderSidebar();
+  renderContent();
+  // hash 变化监听
+  window.addEventListener('hashchange', () => {
+    const h = window.location.hash.replace('#', '');
+    if (h && MODULES.some(m => m.id === h)) {
+      state.current = h;
+      renderSidebar();
+      renderContent();
+    }
+  });
+  // 注册 Service Worker（PWA 离线能力）
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => {
+          console.log('[PWA] Service Worker 已注册');
+          // 监听更新
+          reg.addEventListener('updatefound', () => {
+            const nw = reg.installing;
+            if (nw) {
+              nw.addEventListener('statechange', () => {
+                if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+                  // 新版本已就绪，提示用户刷新
+                  if (confirm('发现新版本，是否立即刷新？')) {
+                    nw.postMessage({ type: 'SKIP_WAITING' });
+                    window.location.reload();
+                  }
+                }
+              });
+            }
+          });
+        })
+        .catch(err => console.warn('[PWA] SW 注册失败:', err));
+    });
+  }
+}
+init();
+</script>
+</body>
+</html>
