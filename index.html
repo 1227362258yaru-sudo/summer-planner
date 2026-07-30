@@ -595,24 +595,25 @@ const MODULES = [
   { id: 'teach', name: '移动开发备课', icon: '📱', group: 'task' },
   { id: 'ruankao', name: '软考高级', icon: '📚', group: 'task' },
   { id: 'codex', name: 'Codex自学', icon: '🤖', group: 'task' },
-  // 截图17个模块
+  // 重点日常记录（提升至前部）
   { id: 'sport', name: '运动记录', icon: '🏃‍♀️', group: 'life' },
+  { id: 'reading', name: '阅读书单', icon: '📖', group: 'life' },
+  { id: 'meditation', name: '冥想放松', icon: '🧘‍♀️', group: 'life' },
+  { id: 'todo', name: '待办清单', icon: '✅', group: 'life' },
+  // 其他生活记录
   { id: 'period', name: '经期记录', icon: '🌸', group: 'life' },
   { id: 'sleep', name: '睡眠检测', icon: '😴', group: 'life' },
   { id: 'travel', name: '旅行计划', icon: '✈️', group: 'life' },
   { id: 'shopping', name: '购物清单', icon: '🛒', group: 'life' },
   { id: 'wishlist', name: '好物记录', icon: '⭐', group: 'life' },
-  { id: 'english', name: '英语学习', icon: '🔤', group: 'life' },
+  { id: 'english', name: '语言学习', icon: '🔤', group: 'life' },
   { id: 'mood', name: '每日心情', icon: '😊', group: 'life' },
   { id: 'dailyq', name: '每日选题', icon: '💡', group: 'life' },
   { id: 'news', name: '新闻重点', icon: '📰', group: 'life' },
   { id: 'hot', name: '爆款笔记', icon: '🔥', group: 'life' },
   { id: 'food', name: '饮食记录', icon: '🍱', group: 'life' },
   { id: 'water', name: '喝水打卡', icon: '💧', group: 'life' },
-  { id: 'reading', name: '阅读书单', icon: '📖', group: 'life' },
-  { id: 'meditation', name: '冥想放松', icon: '🧘‍♀️', group: 'life' },
   { id: 'photo', name: '每日一拍', icon: '📷', group: 'life' },
-  { id: 'todo', name: '待办清单', icon: '✅', group: 'life' },
 ];
 
 // 默认数据
@@ -962,11 +963,11 @@ const SCHEMAS = {
     render: (item) => `<div class="meta"><div class="t">${item.name}</div><div class="d">📅 ${item.date}</div>${item.reason?`<div class="note">${escapeHtml(item.reason)}</div>`:''}</div>`
   },
   english: {
-    title: '英语学习',
+    title: '语言学习',
     icon: '🔤',
     fields: [
       { k: 'date', l: '日期', t: 'date', def: todayStr() },
-      { k: 'content', l: '学习内容', t: 'text', ph: '如：英语单词 50 个' },
+      { k: 'content', l: '学习内容', t: 'text', ph: '如：英语单词 50 个 / 日语 N2 听力' },
       { k: 'duration', l: '时长（分钟）', t: 'number', ph: '30' },
       { k: 'note', l: '备注', t: 'text' },
     ],
@@ -1091,7 +1092,7 @@ function renderModule(m) {
     </div>
     ${stats}
     <div class="form-section" id="formSec">
-      <div class="form-title" id="formToggle">+ 新增${schema.title.replace(/.*?·/, '').replace('记录','').replace('计划','').replace('清单','').replace('书单','').replace('打卡','').replace('学习','').replace('检测','').replace('放松','').replace('笔记','').replace('选题','').replace('重点','').replace('记录','') || '记录'}<span style="margin-left:auto">▾</span></div>
+      <div class="form-title" id="formToggle">+ 新增${schema.title.replace(/.*?·/, '').replace('记录','').replace('计划','').replace('清单','').replace('书单','').replace('打卡','').replace('检测','').replace('放松','').replace('笔记','').replace('选题','').replace('重点','').replace('记录','') || '记录'}<span style="margin-left:auto">▾</span></div>
       <div class="form-body">
         <form id="addForm">
           ${schema.fields.map(f => renderField(f)).join('')}
