@@ -586,10 +586,11 @@
 <script>
 /* ===================== 数据层 ===================== */
 const STORAGE_KEY = 'earth_online_summer_2026_v1';
-const SUMMER_END = new Date('2026-08-20T23:59:59');
+const SETTINGS_KEY = 'earth_online_settings_v1';
+const DEFAULT_END_DATE = '2026-08-20';
 
-// 模块定义
-const MODULES = [
+// 内置模块定义
+const BUILTIN_MODULES = [
   { id: 'overview', name: '总览', icon: '🏠', group: 'main', isOverview: true },
   // 三大任务
   { id: 'teach', name: '移动开发备课', icon: '📱', group: 'task' },
@@ -615,6 +616,30 @@ const MODULES = [
   { id: 'water', name: '喝水打卡', icon: '💧', group: 'life' },
   { id: 'photo', name: '每日一拍', icon: '📷', group: 'life' },
 ];
+
+// 动态模块：内置 + 用户自定义
+let MODULES = [...BUILTIN_MODULES];
+
+// 设置（含截止日期）
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (!raw) return { endDate: DEFAULT_END_DATE, customModules: [] };
+    const s = JSON.parse(raw);
+    if (!s.endDate) s.endDate = DEFAULT_END_DATE;
+    if (!Array.isArray(s.customModules)) s.customModules = [];
+    return s;
+  } catch (e) {
+    return { endDate: DEFAULT_END_DATE, customModules: [] };
+  }
+}
+function saveSettings() {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+}
+
+function getEndDate() {
+  return new Date(state.settings.endDate + 'T23:59:59');
+}
 
 // 默认数据
 function getDefaultData() {
@@ -642,11 +667,33 @@ function saveData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data));
 }
 
+// 初始化 settings 并合并自定义模块
 let state = {
-  data: loadData(),
+  settings: loadSettings(),
+  data: {},
   current: 'overview',
   modal: null,
 };
+// 把自定义模块加入 MODULES
+function refreshModules() {
+  MODULES = [...BUILTIN_MODULES];
+  state.settings.customModules.forEach(m => {
+    if (!MODULES.some(x => x.id === m.id)) {
+      MODULES.push({ ...m, group: 'custom', custom: true });
+    }
+  });
+  // 补齐 data
+  MODULES.filter(m => !m.isOverview).forEach(m => {
+    if (!state.data[m.id]) state.data[m.id] = [];
+  });
+}
+refreshModules();
+state.data = loadData();
+// 保存 data 时也包含自定义模块的数据
+function saveAll() {
+  saveData();
+  saveSettings();
+}
 
 const todayStr = () => {
   const d = new Date();
@@ -660,10 +707,13 @@ function renderSidebar() {
     main: { title: '📌 主面板', items: [] },
     task: { title: '🎯 暑假三大任务', items: [] },
     life: { title: '🌸 生活记录', items: [] },
+    custom: { title: '✨ 我的任务', items: [] },
   };
   MODULES.forEach(m => { if (groups[m.group]) groups[m.group].items.push(m); });
 
-  const html = Object.values(groups).map(g => `
+  const html = Object.values(groups).map(g => {
+    if (g.items.length === 0 && g.title !== '✨ 我的任务') return '';
+    return `
     <div class="module-section">
       <div class="section-title">${g.title}</div>
       ${g.items.map(m => {
@@ -672,15 +722,25 @@ function renderSidebar() {
           <div class="icon">${m.icon}</div>
           <div class="name">${m.name}</div>
           ${m.isOverview ? '' : `<div class="count">${count}</div>`}
+          ${m.custom ? `<button class="icon-btn module-del" data-del="${m.id}" title="删除" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);width:22px;height:22px;font-size:12px;background:transparent;border:none;color:#aaa;cursor:pointer;">×</button>` : ''}
         </div>`;
       }).join('')}
+    </div>`;
+  }).join('') + `
+    <div class="module-section">
+      <div class="module-item" id="addModuleBtn" style="justify-content:center;color:var(--pink-3);border:1px dashed var(--pink-2);margin-top:4px;">
+        <div class="icon">➕</div>
+        <div class="name">新建任务</div>
+      </div>
     </div>
-  `).join('');
+  `;
   document.getElementById('moduleList').innerHTML = html;
 
   // 绑定点击
   document.querySelectorAll('.module-item').forEach(el => {
-    el.onclick = () => {
+    el.onclick = (e) => {
+      if (e.target.classList.contains('module-del')) return;
+      if (el.id === 'addModuleBtn') { openAddModuleModal(); return; }
       state.current = el.dataset.id;
       // 同步 hash（不触发 hashchange，用 history.replaceState）
       history.replaceState(null, '', '#' + state.current);
@@ -693,6 +753,14 @@ function renderSidebar() {
         // 内容滚到顶部
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
+    };
+  });
+  // 绑定删除自定义模块
+  document.querySelectorAll('.module-del').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.del;
+      deleteCustomModule(id);
     };
   });
 
@@ -734,11 +802,16 @@ function renderOverview() {
   // 总记录数
   const total = Object.values(state.data).reduce((s, arr) => s + arr.length, 0);
 
-  // 倒计时
+  // 倒计时（可自定义截止日期）
+  const END = getEndDate();
   const now = new Date();
-  const left = Math.max(0, Math.ceil((SUMMER_END - now) / 86400000));
-  const totalDays = Math.ceil((SUMMER_END - new Date('2026-07-01')) / 86400000);
-  const passed = totalDays - left;
+  const left = Math.max(0, Math.ceil((END - now) / 86400000));
+  // 起始日期取截止日期往前推 60 天作为总周期，或用 7月1日
+  const startRef = new Date(END);
+  startRef.setDate(startRef.getDate() - 60);
+  const totalDays = Math.ceil((END - startRef) / 86400000);
+  const passed = Math.max(0, totalDays - left);
+  const endDateStr = state.settings.endDate;
 
   return `
     <div class="content-header">
@@ -748,10 +821,15 @@ function renderOverview() {
 
     <div class="overview-grid">
       <div class="overview-card">
-        <div class="title">⏳ 暑假进度</div>
+        <div class="title">⏳ 任务周期进度</div>
         <div class="num">${passed}/${totalDays}</div>
-        <div class="sub">还剩 ${left} 天</div>
+        <div class="sub">还剩 ${left} 天 · <a href="#" onclick="openEndDateModal();return false;" style="color:var(--pink-3);text-decoration:underline;">设置截止日期</a></div>
         <div class="progress"><div class="bar" style="width:${(passed/totalDays*100).toFixed(1)}%"></div></div>
+      </div>
+      <div class="overview-card">
+        <div class="title">📅 截止日期</div>
+        <div class="num" style="font-size:22px;">${endDateStr}</div>
+        <div class="sub">剩 ${left} 天 · <a href="#" onclick="openEndDateModal();return false;" style="color:var(--pink-3);">修改</a></div>
       </div>
       <div class="overview-card">
         <div class="title">📊 总记录数</div>
@@ -762,11 +840,6 @@ function renderOverview() {
         <div class="title">🏃 本月运动</div>
         <div class="num">${sportTotal}</div>
         <div class="sub">分钟 · 增肌进行中</div>
-      </div>
-      <div class="overview-card">
-        <div class="title">📚 软考学习</div>
-        <div class="num">${rkHours}h</div>
-        <div class="sub">完成 ${rkDone} 项</div>
       </div>
     </div>
 
@@ -1081,7 +1154,11 @@ const SCHEMAS = {
 };
 
 function renderModule(m) {
-  const schema = SCHEMAS[m.id];
+  // 自定义模块：动态生成 schema
+  let schema = SCHEMAS[m.id];
+  if (!schema && m.custom) {
+    schema = buildCustomSchema(m);
+  }
   if (!schema) return '<div class="empty"><div class="emoji">🚧</div>模块加载中</div>';
   const list = state.data[m.id] || [];
   const stats = computeStats(m.id, list);
@@ -1112,6 +1189,60 @@ function renderModule(m) {
         `).join('')}
     </div>
   `;
+}
+
+// 自定义模块的 schema 生成
+function buildCustomSchema(m) {
+  const base = { title: m.name, icon: m.icon };
+  if (m.type === 'task') {
+    return Object.assign(base, {
+      fields: [
+        { k: 'date', l: '日期', t: 'date', def: todayStr() },
+        { k: 'topic', l: '任务主题', t: 'text', ph: '如：复习第一章' },
+        { k: 'hours', l: '时长（小时）', t: 'number', ph: '2' },
+        { k: 'content', l: '笔记/内容', t: 'textarea', ph: '今日要点...' },
+        { k: 'status', l: '状态', t: 'select', opts: ['计划中', '进行中', '已完成'], def: '进行中' },
+      ],
+      render: (item) => `
+        <div class="meta">
+          <div class="t">${item.topic || '未命名'} <span class="tag ${item.status === '已完成' ? 'green' : item.status === '进行中' ? 'blue' : 'orange'}">${item.status || '计划中'}</span></div>
+          <div class="d">📅 ${item.date} · ⏱ ${item.hours || 0} 小时</div>
+          ${item.content ? `<div class="note">${escapeHtml(item.content)}</div>` : ''}
+        </div>
+      `
+    });
+  } else if (m.type === 'count') {
+    return Object.assign(base, {
+      fields: [
+        { k: 'date', l: '日期', t: 'date', def: todayStr() },
+        { k: 'content', l: '内容', t: 'text', ph: '如：背单词' },
+        { k: 'amount', l: '数量', t: 'number', ph: '50' },
+        { k: 'note', l: '备注', t: 'text' },
+      ],
+      render: (item) => `
+        <div class="meta">
+          <div class="t">${item.content || '记录'} <span class="tag">${item.amount || 0}</span></div>
+          <div class="d">📅 ${item.date}</div>
+          ${item.note ? `<div class="note">${escapeHtml(item.note)}</div>` : ''}
+        </div>
+      `
+    });
+  } else {
+    return Object.assign(base, {
+      fields: [
+        { k: 'date', l: '日期', t: 'date', def: todayStr() },
+        { k: 'title', l: '标题', t: 'text', ph: '记录标题' },
+        { k: 'note', l: '备注', t: 'textarea' },
+      ],
+      render: (item) => `
+        <div class="meta">
+          <div class="t">${item.title || '记录'}</div>
+          <div class="d">📅 ${item.date}</div>
+          ${item.note ? `<div class="note">${escapeHtml(item.note)}</div>` : ''}
+        </div>
+      `
+    });
+  }
 }
 
 function renderField(f) {
@@ -1265,6 +1396,128 @@ window.resetData = () => {
   }
 };
 
+/* ===================== 截止日期设置 ===================== */
+window.openEndDateModal = () => {
+  const modal = document.getElementById('modalBg');
+  const content = document.getElementById('modalContent');
+  content.innerHTML = `
+    <span class="close" onclick="closeModal()">×</span>
+    <h3>📅 设置截止日期</h3>
+    <p style="color:var(--text-2);font-size:13px;margin:8px 0 16px;">设置你的任务周期截止日期，倒计时和进度条会自动更新</p>
+    <div class="form-field">
+      <label>截止日期</label>
+      <input type="date" id="endDateInput" value="${state.settings.endDate}" />
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin:12px 0;">
+      <button class="btn btn-sm btn-ghost" onclick="quickSetDate(7)">+7天</button>
+      <button class="btn btn-sm btn-ghost" onclick="quickSetDate(14)">+14天</button>
+      <button class="btn btn-sm btn-ghost" onclick="quickSetDate(30)">+30天</button>
+      <button class="btn btn-sm btn-ghost" onclick="quickSetDate(60)">+60天</button>
+    </div>
+    <button class="btn btn-block" onclick="saveEndDate()">保存</button>
+  `;
+  modal.classList.add('show');
+};
+window.quickSetDate = (days) => {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  document.getElementById('endDateInput').value = d.toISOString().slice(0,10);
+};
+window.saveEndDate = () => {
+  const v = document.getElementById('endDateInput').value;
+  if (!v) { toast('请选择日期'); return; }
+  state.settings.endDate = v;
+  saveSettings();
+  closeModal();
+  tickClock();
+  renderContent();
+  toast('截止日期已更新 ✨');
+};
+function closeModal() {
+  document.getElementById('modalBg').classList.remove('show');
+}
+
+/* ===================== 自定义模块管理 ===================== */
+const ICON_CHOICES = ['📝','🎯','💼','🎨','🎵','🎮','🌱','☀️','🌙','⚡','🏆','📈','🛠️','💊','🧪','🔬','📐','📊','🎬','🎤','🏝️','🚗','💰','🎁','🐾','🌈'];
+
+window.openAddModuleModal = () => {
+  const modal = document.getElementById('modalBg');
+  const content = document.getElementById('modalContent');
+  content.innerHTML = `
+    <span class="close" onclick="closeModal()">×</span>
+    <h3>➕ 新建任务模块</h3>
+    <p style="color:var(--text-2);font-size:13px;margin:8px 0 16px;">自定义你的任务模块，添加后会出现在左侧"✨ 我的任务"分组</p>
+    <div class="form-field" style="margin-bottom:12px;">
+      <label>模块名称</label>
+      <input type="text" id="newModuleName" placeholder="如：考研复习 / 健身打卡 / 项目开发" />
+    </div>
+    <div class="form-field" style="margin-bottom:12px;">
+      <label>选择图标</label>
+      <div id="iconPicker" style="display:grid;grid-template-columns:repeat(8,1fr);gap:6px;">
+        ${ICON_CHOICES.map((ic,i) => `<div class="icon-choice" data-icon="${ic}" style="padding:8px;text-align:center;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:20px;${i===0?'background:var(--pink-soft);border-color:var(--pink-3);':''}">${ic}</div>`).join('')}
+      </div>
+    </div>
+    <div class="form-field" style="margin-bottom:16px;">
+      <label>记录字段类型</label>
+      <select id="newModuleType">
+        <option value="task">任务型（主题+时长+状态+笔记）</option>
+        <option value="count">计数型（内容+数量）</option>
+        <option value="simple">简单记录（标题+备注）</option>
+      </select>
+    </div>
+    <button class="btn btn-block" onclick="addCustomModule()">创建模块</button>
+  `;
+  // 图标选择
+  let selectedIcon = ICON_CHOICES[0];
+  content.querySelectorAll('.icon-choice').forEach(el => {
+    el.onclick = () => {
+      content.querySelectorAll('.icon-choice').forEach(x => { x.style.background = ''; x.style.borderColor = 'var(--border)'; });
+      el.style.background = 'var(--pink-soft)';
+      el.style.borderColor = 'var(--pink-3)';
+      selectedIcon = el.dataset.icon;
+    };
+  });
+  window._selectedIcon = () => selectedIcon;
+  modal.classList.add('show');
+};
+
+window.addCustomModule = () => {
+  const name = document.getElementById('newModuleName').value.trim();
+  if (!name) { toast('请输入模块名称'); return; }
+  const icon = window._selectedIcon ? window._selectedIcon() : '📝';
+  const type = document.getElementById('newModuleType').value;
+  const id = 'custom_' + Date.now();
+  const newModule = { id, name, icon, type, custom: true };
+  state.settings.customModules.push(newModule);
+  state.data[id] = [];
+  refreshModules();
+  saveAll();
+  closeModal();
+  state.current = id;
+  renderSidebar();
+  renderContent();
+  toast('模块已创建 ✨');
+};
+
+window.deleteCustomModule = (id) => {
+  const m = state.settings.customModules.find(x => x.id === id);
+  if (!m) return;
+  if (!confirm(`确定要删除「${m.name}」吗？该模块下的所有记录都会被删除！`)) return;
+  state.settings.customModules = state.settings.customModules.filter(x => x.id !== id);
+  delete state.data[id];
+  if (state.current === id) state.current = 'overview';
+  refreshModules();
+  saveAll();
+  renderSidebar();
+  renderContent();
+  toast('已删除');
+};
+
+// 点击模态背景关闭
+document.getElementById('modalBg').addEventListener('click', (e) => {
+  if (e.target.id === 'modalBg') closeModal();
+});
+
 /* ===================== 工具 ===================== */
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
@@ -1290,8 +1543,8 @@ function tickClock() {
   document.getElementById('clockTime').textContent = `${hh}:${mm}`;
   const days = ['日','一','二','三','四','五','六'];
   document.getElementById('clockDate').textContent = `${d.getMonth()+1}月${d.getDate()}日 周${days[d.getDay()]}`;
-  const left = Math.max(0, Math.ceil((SUMMER_END - d) / 86400000));
-  document.getElementById('countdown').textContent = `距暑假结束还有 ${left} 天`;
+  const left = Math.max(0, Math.ceil((getEndDate() - d) / 86400000));
+  document.getElementById('countdown').textContent = `距截止还有 ${left} 天`;
 }
 
 /* ===================== 初始化 ===================== */
